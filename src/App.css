@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@import url("https://api.fontshare.com/v2/css?f[]=gambarino@400&f[]=satoshi@300,301,400,401,500,501,700,701,900,901&display=swap");
+
+@font-face {
+  font-family: "Ponderosa";
+  src: url("./fonts/Ponderosa.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
