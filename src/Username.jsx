@@ -75,9 +75,9 @@ const Username = () => {
             →
         </button>
 
-        <button
+        {/* <button
         onClick = {async () => {localStorage.clear(); await deleteDoc(doc(db, "users", user.uid)); console.log("storage cleared")}}
-        className="absolute px-4 h-16 w-w0 top-10 bg-red-900">clear storage</button>
+        className="absolute px-4 h-16 w-w0 top-10 bg-red-900">clear storage</button> */}
     </div>
 }
 
