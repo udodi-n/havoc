@@ -47,6 +47,7 @@ const Username = () => {
             else {
                 setMessage("Username is available ✔");
             }
+            
         }
 
         Username()

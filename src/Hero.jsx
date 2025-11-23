@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
     const navigate = useNavigate();
+    
 
     return <div className="px-5 py-5 flex justify-center items-center h-screen w-full bg-[#1c1c1c]">
         <div className="relative rounded-2xl w-full h-full flex flex-col justify-center items-center gap-8 bg-[#ff0000] overflow-hidden m-0">

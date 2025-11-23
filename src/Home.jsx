@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc, collection, getDocs, query, where, addDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { doc, getDoc, setDoc, collection, getDocs, query, where, addDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
+import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 
 const Home = () => {
     const navigate = useNavigate();
     const currentUser = auth.currentUser;
     const [posts, setPosts] = useState([])
+    const [checkmark, setCheckmark] = useState(false)
+    
 
     useEffect(() => {        
         const updateHome = onSnapshot(collection(db, "posts"), (snapshot) => { 
@@ -17,18 +19,54 @@ const Home = () => {
             .sort((a, b) => b.createdAt - a.createdAt);
 
             setPosts(postArray);
-            console.log(postArray)
+           
         });
 
         return () => updateHome()
 
 }, [])
 
-const deleteInfo = async () => {
-    const cred = await signInAnonymously(auth);
-    const user = cred.user
-    await deleteDoc(doc(db, "users", user.uid))
-}
+        useEffect(() => {
+        const unsub = auth.onAuthStateChanged(user => {
+            if (!user) return;
+            checkAdmin();
+        });
+
+        return () => unsub();
+        }, []);
+
+
+     const checkAdmin =  async () => {
+            const userRef = collection(db, "users")
+            const q = query(userRef, where("isAdmin", "==", true));
+            const snap = await getDocs(q)
+
+            const admins = snap.docs.map(docSnap => docSnap.data().username)
+
+           
+
+            const postRef = collection(db, "posts")
+            const postSnap = await getDocs(postRef)
+
+            postSnap.forEach(async (docSnap) => {
+                const postData = docSnap.data()
+                const postUsername = postData.username;
+
+                const postDocRef = doc(db, "posts", docSnap.id)
+
+                if (admins.includes(postUsername) && !postData.isAdmin) {
+                await setDoc(postDocRef, {isAdmin: true}, {merge: true})
+            } else if (postData.isAdmin && !admins.includes(postData.username)) {
+                await setDoc(postDocRef, {isAdmin: false}, {merge: true})
+            }
+            })
+} 
+
+// const deleteInfo = async () => {
+//     const cred = await signInAnonymously(auth);
+//     const user = cred.user
+//     await deleteDoc(doc(db, "users", user.uid))
+// }
 
 
 
@@ -69,7 +107,7 @@ const deleteInfo = async () => {
                 overflow-y-auto">
     {posts.map(post => (
         <div key={post.id} className="border-t border-b border-white/10 p-4 text-white w-full max-w-2xl">
-            <p className="font-bold">@{post.username}</p>
+            <p className="font-bold flex gap-1">@{post.username}<img className={`${post.isAdmin? 'w-[5%]': 'hidden '}`} src="/badge-check.svg"/> </p>
             <p>{post.post}</p>
         </div>
     ))}

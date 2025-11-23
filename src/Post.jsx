@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react";
 import { db, auth } from "./firebase";
-import { collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc, query, getDocs, where } from 'firebase/firestore'
 
 const Post = () => {
       const navigate = useNavigate();
@@ -9,17 +9,28 @@ const Post = () => {
       const [postLength, setPostLength] = useState(0);
       const [message, setMessage] = useState("");
       const [disable, setDisable] = useState(false)
+      const [admin, setAdmin] = useState(false)
       const currentUser = auth.currentUser;
 
 
       const handlePost = async () => {
-        const user = auth.currentUser;
-        if(!user) return;
+            const userRef = collection(db, "users")
+            const q = query(userRef, where("isAdmin", "==", true));
+            const snap = await getDocs(q)
+
+            const admins = snap.docs.map(docSnap => docSnap.data().username);
+            const isAdmin = admins.includes(username)
+            console.log(admins)
+            
+            const user = auth.currentUser;
+            if(!user) return;
+
 
         await addDoc(collection(db, "posts"), {
             userId: currentUser.uid,
             username: username,
             post: message,
+            isAdmin: isAdmin,
             createdAt: Date.now()
     })
 };
